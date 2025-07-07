@@ -9,7 +9,7 @@ class LoyaltyProgram extends Model
 {
     use HasFactory;
 
-    protected $table = 'loyaltyPrograms';
+    // protected $table = 'loyaltyPrograms';
 
     protected $fillable = [
         'company_id',
@@ -32,5 +32,16 @@ class LoyaltyProgram extends Model
         return $this->belongsTo(Companies::class);
     }
 
+    public function rewards()
+    {
+        return $this->hasMany(LoyaltyReward::class);
+    }
+
+    public function members()
+    {
+        return $this->belongsToMany(User::class)
+            ->withPivot('points_balance')
+            ->using(LoyaltyPoint::class);
+    }
 
 }

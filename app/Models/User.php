@@ -46,4 +46,21 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function loyaltyPrograms()
+    {
+        return $this->belongsToMany(LoyaltyProgram::class)
+            ->withPivot('points_balance')
+            ->using(LoyaltyPoint::class);
+    }
+
+    public function pointTransactions()
+    {
+        return $this->hasMany(PointTransaction::class);
+    }
+
+    public function rewardRedemptions()
+    {
+        return $this->hasMany(RewardRedemption::class);
+    }
 }
