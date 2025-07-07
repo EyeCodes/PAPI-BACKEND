@@ -8,17 +8,12 @@ use Illuminate\Support\Facades\Validator;
 
 class ItemController extends Controller
 {
-    /**
-     * Display a listing of the items.
-     */
+   
     public function index()
     {
         return Item::all();
     }
 
-    /**
-     * Store a newly created item.
-     */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -39,17 +34,11 @@ class ItemController extends Controller
         return response()->json($item, 201);
     }
 
-    /**
-     * Display the specified item.
-     */
     public function show($id)
     {
         return Item::findOrFail($id);
     }
 
-    /**
-     * Update the specified item.
-     */
     public function update(Request $request, $id)
     {
         $item = Item::findOrFail($id);
@@ -72,18 +61,13 @@ class ItemController extends Controller
         return response()->json($item);
     }
 
-    /**
-     * Remove the specified item.
-     */
     public function destroy($id)
     {
         Item::findOrFail($id)->delete();
         return response()->json(null, 204);
     }
 
-    /**
-     * Get items expiring soon (within 30 days)
-     */
+
     public function expiringSoon()
     {
         return Item::where('expiration_date', '<=', now()->addDays(30))
@@ -92,9 +76,6 @@ class ItemController extends Controller
                   ->get();
     }
 
-    /**
-     * Get expired items
-     */
     public function expired()
     {
         return Item::where('expiration_date', '<', now())->get();
