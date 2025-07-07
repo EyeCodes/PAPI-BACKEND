@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('sku')->unique()->nullable();
             $table->string('barcode')->unique()->nullable();
             $table->integer('quantity')->default(0);
+            $table->date('expiration_date')->nullable();
             $table->string('image_url')->nullable();
             
             $table->timestamps();
