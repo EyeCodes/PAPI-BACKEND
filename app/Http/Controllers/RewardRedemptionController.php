@@ -18,6 +18,10 @@ class RewardRedemptionController extends Controller
     //     $this->rewardService = $rewardService;
     // }
 
+    public function index(){
+        return RewardRedemption::all();
+    }
+
     public function redeem(Request $request, $rewardId)
     {
         $validator = Validator::make($request->all(), [

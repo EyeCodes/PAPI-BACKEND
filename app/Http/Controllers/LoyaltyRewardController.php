@@ -10,9 +10,13 @@ class LoyaltyRewardController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index($programId)
-    {
-        return LoyaltyReward::where('loyalty_program_id', $programId)->get();
+    // public function index($programId)
+    // {
+    //     return LoyaltyReward::where('loyalty_program_id', $programId)->get();
+    // }
+
+    public function index(){
+        return LoyaltyReward::all();
     }
 
     /**

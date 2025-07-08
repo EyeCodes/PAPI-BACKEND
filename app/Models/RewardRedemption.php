@@ -9,6 +9,8 @@ class RewardRedemption extends Model
 {
     use HasFactory;
 
+    protected $table = 'loyalty_redemptions';
+
     protected $fillable = [
         'user_id',
         'reward_id',

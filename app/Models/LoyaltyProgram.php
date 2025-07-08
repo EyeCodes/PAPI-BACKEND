@@ -9,7 +9,7 @@ class LoyaltyProgram extends Model
 {
     use HasFactory;
 
-    // protected $table = 'loyaltyPrograms';
+    protected $table = 'loyaltyPrograms';
 
     protected $fillable = [
         'company_id',

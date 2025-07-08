@@ -18,6 +18,10 @@ class PointTransactionController extends Controller
     //     $this->pointService = $pointService;
     // }
 
+    public function index(){
+        return PointTransaction::all();
+    }
+
     public function earnPoints(Request $request)
     {
         $validator = Validator::make($request->all(), [

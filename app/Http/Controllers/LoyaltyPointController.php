@@ -7,9 +7,16 @@ use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use App\Models\PointTransaction;
+use App\Models\LoyaltyPoint;
+
 
 class LoyaltyPointController extends Controller
 {
+
+    public function index(){
+        return LoyaltyPoint::all();
+    }
+
     public function getUserPoints($userId)
     {
         $user = User::with('loyaltyPrograms')->findOrFail($userId);
