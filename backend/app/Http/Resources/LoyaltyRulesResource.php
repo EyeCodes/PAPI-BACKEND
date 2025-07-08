@@ -10,13 +10,13 @@ class LoyaltyRulesResource extends JsonResource
     /**
      * Transform the resource into an array.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
     {
-        // return parent::toArray($request);
         return [
-            "loyalty_program_id" => $this->id,
+            "loyalty_program_id" => $this->loyalty_program_id, // Assuming this is the correct field
             "rule_name" => $this->rule_name,
             "rule_type" => $this->rule_type,
             "points_earned" => $this->points_earned,
@@ -29,6 +29,8 @@ class LoyaltyRulesResource extends JsonResource
             "active_to_date" => $this->active_to_date,
             "created_at" => $this->created_at,
             "updated_at" => $this->updated_at,
+            "is_currently_active" => $this->is_active, // Added for consistency with the controller
+            "description" => $this->description // Added if you want to include the description
         ];
     }
 }
