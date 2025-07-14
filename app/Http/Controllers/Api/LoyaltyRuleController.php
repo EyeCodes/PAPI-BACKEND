@@ -9,6 +9,13 @@ use App\Models\LoyaltyProgram;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Rules\AmountPerPointRule;
+use App\Rules\NonNegativeNumberRule;
+use App\Rules\MinPurchaseAmountRule;
+use App\Rules\DateRangeRule;
+use App\Rules\RuleTypeRule;
+
+
 
 class LoyaltyRuleController extends Controller
 {
@@ -48,15 +55,15 @@ class LoyaltyRuleController extends Controller
     {
         $request->validate([
             'loyalty_program_id' => 'required|exists:loyaltyPrograms,id',
-            'rule_name' => 'required|string|max:255',
-            'rule_type' => 'required|string|in:purchase_based,birthday_bonus,referral_bonus,',
-            'points_earned' => 'nullable|numeric|min:0',
-            'amount_per_point' => 'nullable|numeric|min:0.01',
-            'min_purchase_amount' => 'nullable|numeric|min:0',
+             'rule_name' => 'required|string|max:255',
+            'rule_type' => [ 'required', new RuleTypeRule() ],
+            'points_earned' => ['nullable', new NonNegativeNumberRule()],
+            'amount_per_point' => ['nullable', new AmountPerPointRule($request->rule_type)],
+            'min_purchase_amount' => ['nullable', new MinPurchaseAmountRule()],
             'product_category_id' => 'nullable|integer',
             'product_item_id' => 'nullable|integer',
             'active_from_date' => 'nullable|date',
-            'active_to_date' => 'nullable|date|after_or_equal:active_from_date'
+           'active_to_date' => ['nullable', 'date', new DateRangeRule($request->active_from_date, $request->active_to_date)],
         ]);
 
         if ($request->rule_type === 'purchase_based' || $request->rule_type === 'birthday_bonus' || $request->rule_type === 'referral_bonus' ) {
@@ -120,15 +127,16 @@ class LoyaltyRuleController extends Controller
         }
 
         $request->validate([
+            'loyalty_program_id' => 'required|exists:loyaltyPrograms,id',
             'rule_name' => 'required|string|max:255',
-            'rule_type' => 'required|string|in:purchase_based,birthday_bonus,referral_bonus',
-            'points_earned' => 'nullable|numeric|min:0',
-            'amount_per_point' => 'nullable|numeric|min:0.01',
-            'min_purchase_amount' => 'nullable|numeric|min:0',
+            'rule_type' => [ 'required', new RuleTypeRule() ],
+            'points_earned' => ['nullable', new NonNegativeNumberRule()],
+            'amount_per_point' => ['nullable', new AmountPerPointRule($request->rule_type)],
+            'min_purchase_amount' => ['nullable', new MinPurchaseAmountRule()],
             'product_category_id' => 'nullable|integer',
             'product_item_id' => 'nullable|integer',
             'active_from_date' => 'nullable|date',
-            'active_to_date' => 'nullable|date|after_or_equal:active_from_date'
+           'active_to_date' => ['nullable', 'date', new DateRangeRule($request->active_from_date, $request->active_to_date)],
         ]);
 
         $rule->update($request->only(

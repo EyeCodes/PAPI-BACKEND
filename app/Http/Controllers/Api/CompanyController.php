@@ -10,6 +10,13 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Crypt;
+use App\Rules\CurrencyCodeRule;
+use App\Rules\CompanyLogoUrlRule;
+use App\Rules\BusinessTypeRule;
+use App\Rules\ZipcodeFormatRule;
+use App\Rules\TelephoneContactRule;
+use App\Rules\UniqueBusinessRegistrationRule;
+
 
 use function Pest\Laravel\delete;
 
@@ -31,11 +38,26 @@ class CompanyController extends Controller
                     'company_name' => 'required|string|max:255',
                     'display_name' => 'required|string|max:255',
                     'company_logo' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-                    'business_type' => 'required|string|max:255',
+                    'business_type' => [
+                        'required',
+                        'string',
+                        'max:255',
+                        new BusinessTypeRule(),
+                    ],
                     'user_id' => 'required|int|',
 
-                    'telephone_contact_1' => 'required|string|max:255',
-                    'telephone_contact_2' => 'nullable|string|max:255',
+                    'telephone_contact_1' => [
+                        'nullable',
+                        'string',
+                        'max:255',
+                        new TelephoneContactRule(),
+                    ],
+                    'telephone_contact_2' => [
+                        'nullable',
+                        'string',
+                        'max:255',
+                        new TelephoneContactRule(),
+                    ],
                     'email_contact_1' => 'required|string|max:255',
                     'email_contact_2' => 'nullable|string|max:255',
 
@@ -43,12 +65,26 @@ class CompanyController extends Controller
                     'city_municipality' => 'required|string|max:255',
                     'province' => 'required|string|max:255',
                     'region' => 'required|string|max:255',
-                    'zipcode' => 'required|string|max:255',
+                    'zipcode' => [
+                        'required',
+                        'string',
+                        'max:255',
+                        new ZipcodeFormatRule(),
+                    ],
                     'street'  => 'required}string|max:255',
                     'country' => 'nullable|string|max:255',
-                    'currency_code' => 'required|string|max:255',
+                    'currency_code' => [
+                        'required',
+                        'string',
+                        new CurrencyCodeRule(),
+                    ],
 
-                    'business_registration_number' => 'required|string|max:255',
+                    'business_registration_number' => [
+                        'required',
+                        'string',
+                        'max:255',
+                        new UniqueBusinessRegistrationRule(),
+                    ],
                     'tin_number' => 'required|string|max:255',
 
                 ]);
@@ -83,14 +119,29 @@ class CompanyController extends Controller
         
         $validate = Validator::make($request->all(),
         [
-                    'company_name' => 'required|string|max:255',
+                      'company_name' => 'required|string|max:255',
                     'display_name' => 'required|string|max:255',
-                    'company_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-                    'business_type' => 'required|string|max:255',
+                    'company_logo' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                    'business_type' => [
+                        'required',
+                        'string',
+                        'max:255',
+                        new BusinessTypeRule(),
+                    ],
                     'user_id' => 'required|int|',
 
-                    'telephone_contact_1' => 'required|string|max:255',
-                    'telephone_contact_2' => 'nulable|string|max:255',
+                    'telephone_contact_1' => [
+                        'nullable',
+                        'string',
+                        'max:255',
+                        new TelephoneContactRule(),
+                    ],
+                    'telephone_contact_2' => [
+                        'nullable',
+                        'string',
+                        'max:255',
+                        new TelephoneContactRule(),
+                    ],
                     'email_contact_1' => 'required|string|max:255',
                     'email_contact_2' => 'nullable|string|max:255',
 
@@ -98,12 +149,26 @@ class CompanyController extends Controller
                     'city_municipality' => 'required|string|max:255',
                     'province' => 'required|string|max:255',
                     'region' => 'required|string|max:255',
-                    'zipcode' => 'required|string|max:255',
+                    'zipcode' => [
+                        'required',
+                        'string',
+                        'max:255',
+                        new ZipcodeFormatRule(),
+                    ],
                     'street'  => 'required}string|max:255',
                     'country' => 'nullable|string|max:255',
-                    'currency_code' => 'required|string|max:255',
+                    'currency_code' => [
+                        'required',
+                        'string',
+                        new CurrencyCodeRule(),
+                    ],
 
-                    'business_registration_number' => 'required|string|max:255',
+                    'business_registration_number' => [
+                        'required',
+                        'string',
+                        'max:255',
+                        new UniqueBusinessRegistrationRule(),
+                    ],
                     'tin_number' => 'required|string|max:255',
 
                 ]);
@@ -136,6 +201,7 @@ class CompanyController extends Controller
     public function show(Company $company){
         return new CompanyResource($company);
     }
+
     public function destroy(Company $company){
 
             $company->delete();
