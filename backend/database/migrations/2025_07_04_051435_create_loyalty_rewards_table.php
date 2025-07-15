@@ -15,11 +15,16 @@ return new class extends Migration
             // Primary key
             $table->id();
 
-            // Foreign key to loyalty_programs (optional)
+            // // Foreign key to loyalty_programs (optional)
             // $table->foreignId('loyalty_program_id')
             //     ->nullable()
             //     ->constrained('loyalty_programs')
             //     ->nullOnDelete();
+
+            $table->foreignId('program_rules_id')
+                ->nullable()
+                ->constrained('loyalty_program_rules')
+                ->nullOnDelete();
 
             // Reward details
             $table->string('reward_name', 255);
@@ -36,6 +41,7 @@ return new class extends Migration
             //     ->nullable()
             //     ->constrained('items')
             //     ->nullOnDelete();
+            
             $table->string('voucher_code', 100)->nullable();
 
             // Status and limits

@@ -13,14 +13,14 @@ class LoyaltyReward extends Model
     protected $table = 'loyalty_rewards';
 
     protected $fillable = [
-        'loyalty_program_id',
+        'program_rules_id',
         'reward_name',
         'description',
         'reward_type',
         'point_cost',
         'discount_value',
         'discount_percentage',
-        'item_id',
+        // 'item_id',
         'voucher_code',
         'is_active',
         'max_redemption_rate',
@@ -39,9 +39,9 @@ class LoyaltyReward extends Model
     /**
      * Reward belongs to a loyalty program.
      */
-    public function loyaltyProgram(): BelongsTo
+    public function loyaltyProgramRule(): BelongsTo
     {
-        return $this->belongsTo(LoyaltyProgram::class);
+        return $this->belongsTo(loyaltyProgramRule::class);
     }
 
     /**

@@ -23,7 +23,7 @@ return new class extends Migration
             // Program details
             $table->string('program_name', 255);
             $table->text('description')->nullable();
-            $table->string('program_type', 100);
+            $table->string('program_type', 100)->default('point_based');
 
             // Status & dates
             $table->boolean('is_active')->default(true);

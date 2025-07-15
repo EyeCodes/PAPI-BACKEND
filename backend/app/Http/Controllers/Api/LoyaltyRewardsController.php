@@ -6,7 +6,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\RewardsResource;
 use Illuminate\Http\Request;
-use App\Models\Rewards;
+use App\Models\LoyaltyReward;
 use Illuminate\Support\Facades\Validator;
 
 
@@ -15,7 +15,7 @@ class LoyaltyRewardsController extends Controller // Now, this line will work co
     // List all rewards
     public function index()
     {
-        $reward = Rewards::get();
+        $reward = LoyaltyReward::get();
 
         if ($reward->count() > 0){
             return RewardsResource::collection($reward);
@@ -48,7 +48,7 @@ class LoyaltyRewardsController extends Controller // Now, this line will work co
             return response()->json($validator->errors(), 422);
         }
 
-        $reward =Rewards::create([ 
+        $reward =LoyaltyReward::create([ 
             'reward_name' => $request->reward_name,
             'reward_type' => $request->reward_type,
             'point_cost' => $request->point_cost,
@@ -59,7 +59,7 @@ class LoyaltyRewardsController extends Controller // Now, this line will work co
     }
 
     // Show a single voucher
-    public function show(Rewards $reward)
+    public function show(LoyaltyReward $reward)
     {
         
             return new RewardsResource($reward);
@@ -67,7 +67,7 @@ class LoyaltyRewardsController extends Controller // Now, this line will work co
     }
 
     // Update a voucher
-    public function update(Request $request, Rewards $reward)
+    public function update(Request $request, LoyaltyReward $reward)
     {
         $validate = Validator::make($request->all(), [
             //'loyalty_program_id' => 'required',
@@ -94,7 +94,7 @@ class LoyaltyRewardsController extends Controller // Now, this line will work co
     }
 
     // Delete a voucher
-    public function destroy(Rewards $reward)
+    public function destroy(LoyaltyReward $reward)
     {
         $reward->delete();
         return response()->json(['message' => $reward]);

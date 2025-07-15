@@ -35,6 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('companies', CompanyController::class);
     Route::apiResource('rewards', LoyaltyRewardsController::class);
     Route::apiResource('loyalty-rules', LoyaltyRuleController::class);
+    Route::apiResource('loyalty-programs', LoyaltyRuleController::class);
 
     Route::post('logout', [AuthController::class, 'logout']);
 });

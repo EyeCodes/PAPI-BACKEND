@@ -18,7 +18,9 @@ class RewardsResource extends JsonResource
 
         return[
             'id' => $this->id,
+            'loyalty_program_id' => $this->loyalty_program_id,
             'reward_name' => $this->reward_name,
+            'description' => $this->description,
             'reward_type' => $this->reward_type,
             'point_cost' => $this->point_cost,
             'discount_value' => $this->discount_value,
