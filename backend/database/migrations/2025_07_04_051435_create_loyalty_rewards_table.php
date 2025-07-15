@@ -11,29 +11,43 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('loyaltyRewards', function (Blueprint $table) {
+        Schema::create('loyalty_rewards', function (Blueprint $table) {
+            // Primary key
             $table->id();
-            $table->unsignedBigInteger('loyalty_program_id');
-            $table->foreign('loyalty_program_id')->references('id')->on('loyaltyPrograms')->onDelete('cascade');
 
-            $table->string('reward_name');
+            // Foreign key to loyalty_programs (optional)
+            // $table->foreignId('loyalty_program_id')
+            //     ->nullable()
+            //     ->constrained('loyalty_programs')
+            //     ->nullOnDelete();
+
+            // Reward details
+            $table->string('reward_name', 255);
             $table->text('description')->nullable();
+            $table->string('reward_type', 50);
 
-            $table->string('reward_type');
-            $table->decimal('point_cost');
-            $table->decimal('discound_value')->nullable();
-            $table->decimal('discount-percentage')->nullable();
+            // Point cost and discount
+            $table->decimal('point_cost', 10, 2);
+            $table->decimal('discount_value', 10, 2)->nullable();
+            $table->decimal('discount_percentage', 5, 2)->nullable();
 
-            $table->unsignedBigInteger('item_id');
-            $table->string('voucher_code')->nullable();
+            // Item/voucher
+            // $table->foreignId('item_id')
+            //     ->nullable()
+            //     ->constrained('items')
+            //     ->nullOnDelete();
+            $table->string('voucher_code', 100)->nullable();
 
+            // Status and limits
             $table->boolean('is_active')->default(true);
-            $table->integer('max_redemption_rate')->nullable();
+            $table->unsignedInteger('max_redemption_rate')->nullable();
+            $table->unsignedInteger('expiration_days')->nullable();
 
-            $table->integer('expiration_days')->nullable();
+            // Timestamps
+            $table->timestamps();
 
-            $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->useCurrent();
+            // Indexes
+            $table->index(['reward_type', 'is_active']);
         });
     }
 
@@ -42,6 +56,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('loyaltyRewards');
+        Schema::dropIfExists('loyalty_rewards');
     }
 };

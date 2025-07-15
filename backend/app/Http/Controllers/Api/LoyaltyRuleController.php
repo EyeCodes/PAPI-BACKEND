@@ -33,7 +33,7 @@ class LoyaltyRuleController extends Controller
             ->get()
             ->map(function($rule) {
                 $rule->is_currently_active = $rule->is_active;
-                $rule->description = $rule->description;
+                // $rule->description = $rule->description;
                 return $rule;
             });
 

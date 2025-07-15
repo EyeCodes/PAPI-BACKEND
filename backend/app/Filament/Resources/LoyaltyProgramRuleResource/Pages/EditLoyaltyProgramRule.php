@@ -14,7 +14,6 @@ class EditLoyaltyProgramRule extends EditRecord
     {
         return [
             Actions\DeleteAction::make(),
-            
         ];
     }
 }

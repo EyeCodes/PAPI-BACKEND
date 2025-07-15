@@ -12,33 +12,47 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('companies', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->string('company_name');
-            $table->string('display_name');
-            $table->string('company_logo');
-            $table->string('business_type');
+            $table->id(); // Primary key: auto-increment
 
-            $table->string('telephone_contact_1');
-            $table->string('telephone_contact_2');
-            $table->string('email_contact_1');
-            $table->string('email_contact_2');
+            $table->uuid('uuid')->unique()->index();
 
+            // Foreign key to users table
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->cascadeOnDelete();
+
+            // Company Details
+            $table->string('company_name')->index();
+            $table->string('display_name')->nullable();
+            $table->string('company_logo', 512)->nullable();
+            $table->string('business_type', 100);
+
+            // Contact Information
+            $table->string('telephone_contact_1', 50);
+            $table->string('telephone_contact_2', 50)->nullable();
+            $table->string('email_contact_1')->index();
+            $table->string('email_contact_2')->nullable();
+
+            // Address
+            $table->string('street');
             $table->string('barangay');
             $table->string('city_municipality');
             $table->string('province');
             $table->string('region');
-            $table->string('zipcode');
-            $table->string('country');
+            $table->string('zipcode', 20);
+            $table->string('country', 100)->default('Philippines');
 
+            // Business Identifiers
             $table->string('business_registration_number');
             $table->string('tin_number');
-            $table->string('currency_code')->default('PHP');
+            $table->char('currency_code', 3)->default('PHP');
 
-            $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->useCurrent();
-            
+            // Status
+            $table->boolean('is_active')->default(true);
+
+            // Timestamps & Soft Deletes
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -47,6 +61,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('company');
+        Schema::dropIfExists('companies');
     }
 };

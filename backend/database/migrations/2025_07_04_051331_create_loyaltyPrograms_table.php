@@ -11,25 +11,32 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('loyaltyPrograms', function (Blueprint $table) {
+        Schema::create('loyalty_programs', function (Blueprint $table) {
+            // Primary key (auto-increment)
             $table->id();
-            $table->unsignedBigInteger('company_id');
-            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
 
-            $table->string('program_name');
+            // Foreign key to companies table
+            $table->foreignId('company_id')
+                ->constrained('companies')
+                ->onDelete('cascade');
+
+            // Program details
+            $table->string('program_name', 255);
             $table->text('description')->nullable();
-            $table->string('program_type');
+            $table->string('program_type', 100);
 
-            $table->boolean('is_active')->default(True);
-
+            // Status & dates
+            $table->boolean('is_active')->default(true);
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
 
             $table->text('instructions')->nullable();
-            
-            $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->useCurrent();
 
+            // Timestamps
+            $table->timestamps();
+
+            // Indexes
+            $table->index(['program_name', 'is_active']);
         });
     }
 
@@ -38,6 +45,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('loyaltyPrograms');
+        Schema::dropIfExists('loyalty_programs');
     }
 };
