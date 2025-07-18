@@ -26,8 +26,8 @@ class CompanyResource extends JsonResource
 
             'telephone_contact_1' => $this->telephone_contact_1,
             'telephone_contact_2' => $this->telephone_contact_2,
-            'email_contact_1' => $this->address_contact_1,
-            'email_contact_2' => $this->address_contact_2,
+            'email_contact_1' => $this->email_contact_1,
+            'email_contact_2' => $this->email_contact_2,
 
             'country'=>$this->country,
             'province'=>$this->province,
