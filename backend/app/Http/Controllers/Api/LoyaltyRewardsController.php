@@ -21,13 +21,14 @@ class LoyaltyRewardsController extends Controller
     public function index()
     {
 
-        $reward = LoyaltyReward::get();
+        Log::info("RewardsController@index called");
+
+        $reward = Rewards::get();
 
         if ($reward->count() > 0){
             return RewardsResource::collection($reward);
-        }
-        else{
-            return response()->json(['message' => 'Empty'], status:200);
+        } else {
+            return response()->json(['message' => 'Empty'], 200);
         }
         
     }

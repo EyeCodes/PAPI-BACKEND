@@ -24,7 +24,7 @@ class LoyaltyRewardsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'loyalty_program_id' => 'required|exists:loyaltyPrograms,id',
+            //'loyalty_program_id' => 'required|exists:loyaltyPrograms,id',
             'reward_name' => 'required|string|max:255',
             'reward_type' => ['required', 'string'],
             new ValidRewardFields(),
