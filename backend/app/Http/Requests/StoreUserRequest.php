@@ -15,7 +15,7 @@ class StoreUserRequest extends FormRequest
             'password' => ['required', 'string', 'min:8', 'confirmed', new PasswordComplexityRule()],
             'gender' => 'required|string',
             'home_address' => 'required|string',
-            'current_address' => 'required|string',
+            // 'current_address' => 'required|string',
             'date_of_birth' => ['required', 'date', 'before:today'],
             'contact_num' => ['required', 'digits_between:7,15'],
             // 'avatar' => ['nullable', 'image', 'max:2048'], 

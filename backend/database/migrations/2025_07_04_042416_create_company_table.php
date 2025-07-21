@@ -16,10 +16,6 @@ return new class extends Migration
 
             $table->uuid('uuid')->unique()->index();
 
-            // Foreign key to users table
-            $table->foreignId('user_id')
-                ->constrained('users')
-                ->cascadeOnDelete();
 
             // Company Details
             $table->string('company_name')->index();
