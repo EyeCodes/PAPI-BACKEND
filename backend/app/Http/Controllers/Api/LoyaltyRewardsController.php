@@ -39,6 +39,10 @@ class LoyaltyRewardsController extends Controller
     {
         $reward = Rewards::create($request->validated());
 
+        if ($reward->fails()) {
+            return response()->json($reward->errors(), 422);
+        }
+
         return new RewardsResource($reward);
     }
 
@@ -53,12 +57,6 @@ class LoyaltyRewardsController extends Controller
     {
         $reward = Rewards::create($request->validated());
 
-        $reward->update([
-            'reward_name' => $request->reward_name,
-            'reward_type' => $request->reward_type,
-            'point_cost' => $request->point_cost,
-            'item_id' => $request->item_id,
-        ]);
         return new RewardsResource($reward);
     }
 

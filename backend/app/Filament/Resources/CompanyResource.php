@@ -35,6 +35,8 @@ class CompanyResource extends Resource
                     ->searchable(),
                 Forms\Components\Select::make('user_id')
                     ->required()
+                    ->preload()
+                    ->multiple()
                     ->relationship('user', 'name')
                     ->searchable(),
             ])->columns(2),

@@ -40,17 +40,7 @@ class LoyaltyProgramController extends Controller
     public function update(LoyaltyProgramRequest $request, $id)
     {
         $program = LoyaltyProgram::find($id);
-
-        $program->update([
-        'program_name'  => $request->program_name,
-        'program_type'  => $request->program_type,
-        'description'   => $request->description,
-        'company_id'    => $request->company_id,
-        'is_active'     => $request->is_active ?? true,
-        'start_date'    => $request->start_date,
-        'end_date'      => $request->end_date,
-        'instructions'  => $request->instructions,
-        ]);
+        $program = LoyaltyProgram::update($request->validated());
 
     return new LoyaltyProgramResource($program);
     }
