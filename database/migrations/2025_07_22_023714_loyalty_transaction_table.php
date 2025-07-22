@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transaction', function (Blueprint $table) {
+        Schema::create('loyalty_transaction', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('program_id');
+            $table->unsignedBigInteger('item_id');
             $table->integer('points');
             $table->string('transaction_type'); // earn, redeem, expire 
             $table->string('source'); // purchase, referral, birthday, etc
@@ -23,6 +24,8 @@ return new class extends Migration
             
             $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('program_id')->references('id')->on('loyalty_programs');
+            $table->foreign('item_id')->references('id')->on('product_items');
+            
         });
     }
 
