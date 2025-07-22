@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -31,7 +32,9 @@ class RewardsResource extends JsonResource
             'is_active' => (bool) $this->is_active,
             'max_redemption_rate' => $this->max_redemption_rate,
             'expiration_days' => $this->expiration_days,
+            'users' => UserResource::collection($this->whenLoaded('users')),
             'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at, 
         ];
     }
 }
