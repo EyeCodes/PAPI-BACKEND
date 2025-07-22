@@ -10,7 +10,8 @@ class ProductCategory extends Model
 {
     use HasFactory;
 
-    protected $table = 'productCategory';
+    protected $table = 'product_categories';
+
     protected $fillable = [
         'category_name',
         'description',
@@ -19,14 +20,14 @@ class ProductCategory extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
-    public function loyaltyProgramRules(): HasMany
-    {
-        return $this->hasMany(LoyaltyProgramRule::class);
-    }
-
-    public function productItems(): HasMany
+    /**
+     * A product category may have many products.
+     */
+    public function products(): HasMany
     {
         return $this->hasMany(ProductItem::class);
     }

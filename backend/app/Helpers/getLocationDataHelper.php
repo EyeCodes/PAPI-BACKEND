@@ -1,85 +1,92 @@
 <?php
 
-  namespace App\Helpers;
+namespace App\Helpers;
 
 use Exception;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
-use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
-use PhpParser\Node\Expr\Throw_;
 
-use function Laravel\Prompts\error;
+class GetLocationDataHelper
+{
+    /**
+     * Path to the JSON file containing PH locations
+     */
+    protected static string $path = 'philippine_provinces_cities_municipalities_and_barangays_2019v2.json';
 
-class getLocationDataHelper{
-
-  protected static ?array $phLocations = null;
-  protected static string $phLocationsPath = 'json/philippine_provinces_cities_municipalities_and_barangays_2019v2.json';
-
-  protected static function loadData():array{
-
-    if(self::$phLocations != null){
-      return self::$phLocations;
+    /**
+     * Load PH location data from cache or JSON file
+     *
+     * - Caches the data forever after first load
+     * - Avoids disk I/O on every request
+     * - Throws Exception if JSON is missing or malformed
+     * -
+     * - NOTE: This is used for speed and performance of the website, since technically you are making a request every
+     * - time you load the page in your previous code, and this is a lot of data to load every time.
+     * - If you need to clear the cache, run `php artisan cache:clear`
+     * * @throws Exception
+     */
+    protected static function data(): array
+    {
+        return Cache::rememberForever('ph_locations', function () {
+            if (!Storage::exists(self::$path)) {
+                throw new Exception("Missing JSON at " . Storage::path(self::$path));
+            }
+            $data = json_decode(Storage::get(self::$path), true);
+            return is_array($data) ? $data : throw new Exception("Malformed JSON");
+        });
     }
 
-    try{
-    if(!Storage::disk('local')->exists(self::$phLocationsPath)){
-        throw new Exception("FAILED TO FIND JSON FILE AT" . Storage::path(self::$phLocationsPath));
+    /**
+     *
+     * Returns: [region_code => region_name]
+     */
+    public static function getRegions(): array
+    {
+        return collect(self::data()['region_code'] ?? [])
+            ->mapWithKeys(fn($region, $code) => [$code => $region['region_name'] ?? $code])
+            ->all();
     }
 
-        $phLocationsJson = Storage::disk('local')->get(self::$phLocationsPath);
-        self::$phLocations = json_decode($phLocationsJson, true);
-      if(!is_array(self::$phLocations) || empty(self::$phLocations)){
-        throw new Exception("Json File is Empty or is malformed");
-      }
-
+    /**
+     * Get all provinces in a given region
+     *
+     * @param string|null $region Region code (e.g., "01")
+     * Returns: [province_code => province_name]
+     */
+    public static function getProvinces(?string $region): array
+    {
+        return collect(Arr::get(self::data(), "region_code.$region.province_list", []))
+            ->mapWithKeys(fn($province, $code) => [$code => $province['province_name'] ?? $code])
+            ->all();
     }
-    catch(Exception $e){
-        self::$phLocations = [];
+
+    /**
+     * Get all municipalities in a given province
+     *
+     * @param string|null $region Region code
+     * @param string|null $province Province code
+     * Returns: [municipality_code => municipality_name]
+     */
+    public static function getMunicipalities(?string $region, ?string $province): array
+    {
+        return collect(Arr::get(self::data(), "region_code.$region.province_list.$province.municipality_list", []))
+            ->mapWithKeys(fn($municipality, $code) => [$code => $municipality['municipality_name'] ?? $code])
+            ->all();
     }
 
-    return self::$phLocations;
-  }
-
-  public static function getRegions():array{
-
-    $data = self::loadData();
-    return Collection::make($data['region_code'])->mapWithKeys(fn ($region, $code) => [$code => $region['region_name']])->all();
-
-  }
-
-    public static function getProvince(?string $regionCode):array{
-
-    $data = self::loadData();
-    if(empty($regionCode)){
-      return [''];
+    /**
+     * Get all barangays in a given municipality
+     *
+     * @param string|null $region Region code
+     * @param string|null $province Province code
+     * @param string|null $municipality Municipality code
+     * Returns: [barangay_name => barangay_name]
+     */
+    public static function getBarangays(?string $region, ?string $province, ?string $municipality): array
+    {
+        return collect(Arr::get(self::data(), "region_code.$region.province_list.$province.municipality_list.$municipality.barangay_list", []))
+            ->mapWithKeys(fn($barangay) => [$barangay => $barangay])
+            ->all();
     }
-        return Collection::make($data['region_code'][$regionCode]['province_list'])->mapWithKeys(fn($province, $code)=>[$code => $code])->all();
-
-    // return Collection::make($data['region_code'])
-  }
-
-    public static function getMunicipality(?string $regionCode, ?string $provinceName):array{
-
-    $data = self::loadData();
-    if(empty($regionCode) || empty($provinceName)){
-      return [''];
-    }
-        return Collection::make($data['region_code'][$regionCode]['province_list'][$provinceName]['municipality_list'])->mapWithKeys(fn($municipality, $code)=> [$code=>$code])->all();
-
-    // return Collection::make($data['region_code'])
-  }
-
-    public static function getBarangay(?string $regionCode, ?string $provinceName, ?string $municipality):array{
-
-    $data = self::loadData();
-    if(empty($regionCode) || empty($provinceName) || empty($municipality)){
-      return [''];
-    }
-        return Collection::make($data['region_code'][$regionCode]['province_list'][$provinceName]['municipality_list'][$municipality]['barangay_list'])->mapWithKeys(fn($barangay)=>[$barangay=>$barangay])->all();
-
-  }
-
 }

@@ -2,30 +2,47 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 class LoyaltyProgram extends Model
 {
-    protected $table = 'loyaltyPrograms';
+    use HasFactory;
+
+    protected $table = 'loyalty_programs';
+
+    /**
+     * The attributes that are mass assignable.
+     */
     protected $fillable = [
-    'id',
-    'company_id',
-    'program_name',
-    'description',
-    'program_type',
-    'instructions',
-    'created_at',
-    'updated_at',
+        'company_id',
+        'program_name',
+        'description',
+        'program_type',
+        'is_active',
+        'start_date',
+        'end_date',
+        'instructions',
     ];
 
+    /**
+     * The attributes that should be cast.
+     */
     protected $casts = [
         'is_active' => 'boolean',
-        'start_date' => 'datetime',
-        'end_date' => 'datetime',
+        'start_date' => 'date',
+        'end_date' => 'date',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
-    public function rules()
+    /**
+     * Loyalty program belongs to a company.
+     */
+    public function company(): BelongsTo
     {
-        return $this->hasMany(LoyaltyProgramRule::class, 'loyalty_program_id');
+        return $this->belongsTo(Company::class);
     }
 }

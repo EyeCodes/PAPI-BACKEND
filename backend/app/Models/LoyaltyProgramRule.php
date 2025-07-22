@@ -8,7 +8,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class LoyaltyProgramRule extends Model
 {
-    protected $table = 'loyaltyProgramRules';
+    use HasFactory;
+
+    protected $table = 'loyalty_program_rules';
+
     protected $fillable = [
         'loyalty_program_id',
         'rule_name',
@@ -21,28 +24,36 @@ class LoyaltyProgramRule extends Model
         'is_active',
         'active_from_date',
         'active_to_date',
+        'usage_limit',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'active_from_date' => 'date',
         'active_to_date' => 'date',
-        'points_earned' => 'integer',
-        'amount_per_point' => 'decimal:2',
-        'min_purchase_amount' => 'decimal:2',
-        'usage_limit' => 'integer',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
+    /**
+     * Belongs to a loyalty program.
+     */
     public function loyaltyProgram(): BelongsTo
     {
         return $this->belongsTo(LoyaltyProgram::class);
     }
 
+    /**
+     * Belongs to a product category (optional).
+     */
     public function productCategory(): BelongsTo
     {
         return $this->belongsTo(ProductCategory::class);
     }
 
+    /**
+     * Belongs to a product item (optional).
+     */
     public function productItem(): BelongsTo
     {
         return $this->belongsTo(ProductItem::class);

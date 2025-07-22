@@ -2,20 +2,26 @@
 
 namespace App\Http\Controllers\Api;
 
-
 use App\Http\Controllers\Controller;
 use App\Http\Resources\RewardsResource;
+use App\Models\LoyaltyReward as Rewards;
 use Illuminate\Http\Request;
-use App\Models\Rewards;
+
+use Illuminate\Http\Response;
+use App\Models\LoyaltyReward;
 use Illuminate\Support\Facades\Validator;
 
+use App\Http\Requests\LoyaltyRewardsRequest;
 
-class LoyaltyRewardsController extends Controller // Now, this line will work correctly
+class LoyaltyRewardsController extends Controller
 {
-    // List all rewards
+    /**
+     * Display a listing of the rewards.
+     */
     public function index()
     {
-        $reward = Rewards::get();
+
+        $reward = LoyaltyReward::get();
 
         if ($reward->count() > 0){
             return RewardsResource::collection($reward);
@@ -24,79 +30,41 @@ class LoyaltyRewardsController extends Controller // Now, this line will work co
             return response()->json(['message' => 'Empty'], status:200);
         }
         
-        
     }
 
-    // Create a new voucher
-    public function store(Request $request)
+    /**
+     * Store a newly created reward in storage.
+     */
+    public function store(LoyaltyRewardsRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            //'loyalty_program_id' => 'required',
-            'reward_name' => 'required|string|max:255',
-            'reward_type' => 'required|string',
-            'point_cost' => 'required|numeric|min:0',
-            'discount_value' => 'nullable|numeric',
-            'discount_percentage' => 'nullable|numeric',
-            'item_id' => 'required|integer',
-            'voucher_code' => 'nullable|string|unique:loyaltyRewards,voucher_code',
-            'is_active' => 'boolean',
-            'max_redemption_rate' => 'nullable|integer',
-            'expiration_days' => 'nullable|integer'
-        ]);
+        $reward = Rewards::create($request->validated());
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+        if ($reward->fails()) {
+            return response()->json($reward->errors(), 422);
         }
-
-        $reward =Rewards::create([ 
-            'reward_name' => $request->reward_name,
-            'reward_type' => $request->reward_type,
-            'point_cost' => $request->point_cost,
-            'item_id' => $request->item_id,
-        ]);
 
         return new RewardsResource($reward);
     }
 
     // Show a single voucher
-    public function show(Rewards $reward)
+    public function show(LoyaltyReward $reward)
     {
-        
             return new RewardsResource($reward);
-
     }
 
     // Update a voucher
-    public function update(Request $request, Rewards $reward)
+    public function update(LoyaltyRewardsRequest $request, Rewards $reward)
     {
-        $validate = Validator::make($request->all(), [
-            //'loyalty_program_id' => 'required',
-            'reward_name' => 'required|string|max:255',
-            'reward_type' => 'required|string',
-            'point_cost' => 'required|numeric|min:0',
-            'discount_value' => 'nullable|numeric',
-            'discount_percentage' => 'nullable|numeric',
-            'item_id' => 'required|integer',
-            'voucher_code' => 'nullable|string|unique:loyaltyRewards,voucher_code',
-            'is_active' => 'boolean',
-            'max_redemption_rate' => 'nullable|integer',
-            'expiration_days' => 'nullable|integer'
-        ]);
+        $reward = Rewards::create($request->validated());
 
-            //'loyalty_program_id' => 'required',
-        $reward->update([
-            'reward_name' => $request->reward_name,
-            'reward_type' => $request->reward_type,
-            'point_cost' => $request->point_cost,
-            'item_id' => $request->item_id,
-        ]);
         return new RewardsResource($reward);
     }
 
     // Delete a voucher
-    public function destroy(Rewards $reward)
+    public function destroy(LoyaltyReward $reward)
     {
         $reward->delete();
         return response()->json(['message' => $reward]);
+
     }
 }

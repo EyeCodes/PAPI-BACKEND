@@ -3,35 +3,49 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreUserRequest;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Email;
+use Illuminate\Support\Str;
+use App\Rules\PasswordComplexityRule;
+
 
 use function Laravel\Prompts\error;
 use function Laravel\Prompts\password;
 
 class AuthController extends Controller
 {
-    public function register(Request $request){
-        $validate = Validator::make($request->all(),[
-            'name'=> 'required|string|max:255',
-            'email'=> 'required|email|unique:users',
-            'password' => 'required|string|between:8, 255|confirmed'
-        ]);
+    public function register(StoreUserRequest $request){
+        $user = User::create($request->validated());
         
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => $request->password,
-        ]);
+        // $user = User::create([
+        //     'name' => $request->name,
+        //     'email' => $request->email,
+        //     'password' => $request->password,
+        // ]);
         $token = $user->createToken($request->name);
+
+
+        // if($request->hasFile('avatar')){
+        //     $avatar = $request->file('avatar');
+
+        //     $fileName = Str::uuid() . '.' . 
+        //     $avatar->getClientOriginalExtension();
+        //     $path = $avatar->storeAs('avatar', $fileName, 'public');
+
+        //     $user->avatar = $path;
+        // };
+
+        // $user->save();
 
         return $token->plainTextToken;
 
-        // return $token;
     }
+
+
 
     public function login(Request $request){
 
@@ -41,6 +55,7 @@ class AuthController extends Controller
         ]);
 
         $user = User::where('email',$request->email)->first();
+        $user->load('companies');
 
         if(!Hash::check($request->password, $user->password)){
             return [
@@ -48,7 +63,8 @@ class AuthController extends Controller
             ];
         }
         $token = $user->createToken($user->email);
-        return $token->plainTextToken;
+        // return $token->plainTextToken;
+        return response()->json($user);
     }
 
     public function logout(Request $request){
@@ -58,4 +74,3 @@ class AuthController extends Controller
     }
 
 }
-

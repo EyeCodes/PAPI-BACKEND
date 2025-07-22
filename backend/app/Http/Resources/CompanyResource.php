@@ -17,7 +17,6 @@ class CompanyResource extends JsonResource
 
         return [
             'company_id' => $this->id,
-            'user_id'=>$this->user_id,
             'company_name' => $this->company_name,
             'display_name' => $this->display_name,
 
@@ -26,8 +25,8 @@ class CompanyResource extends JsonResource
 
             'telephone_contact_1' => $this->telephone_contact_1,
             'telephone_contact_2' => $this->telephone_contact_2,
-            'email_contact_1' => $this->address_contact_1,
-            'email_contact_2' => $this->address_contact_2,
+            'email_contact_1' => $this->email_contact_1,
+            'email_contact_2' => $this->email_contact_2,
 
             'country'=>$this->country,
             'province'=>$this->province,
@@ -41,6 +40,7 @@ class CompanyResource extends JsonResource
             'tin_number'=>$this->tin_number,
             'currency_code'=>$this->currency_code,
             'created_at'=>$this->created_at,
+            'users' => UserResource::collection($this->whenLoaded('users')),
 
         ];
 

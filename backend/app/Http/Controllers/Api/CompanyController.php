@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CompanyRequest;
 use App\Http\Resources\CompanyResource;
 use App\Models\Company;
 use Illuminate\Support\Facades\Storage;
@@ -10,13 +11,14 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Crypt;
+use PHPUnit\Event\TestSuite\Loaded;
 
 use function Pest\Laravel\delete;
 
 class CompanyController extends Controller
 {
     public function index(){
-        $company = Company::get();
+        $company = Company::with('users')->get();
         if($company->count() > 0){
             return CompanyResource::collection($company);
         }
@@ -24,9 +26,9 @@ class CompanyController extends Controller
             return response()->json(['message'=> 'Empty'],200);
         }
     }
-    public function store(Request $request){
+    public function store(CompanyRequest $request){
         
-        $validate = Validator::make($request->all(),
+        $validate = Validator::create($request->all(),
         [
                     'company_name' => 'required|string|max:255',
                     'display_name' => 'required|string|max:255',
@@ -66,12 +68,6 @@ class CompanyController extends Controller
             $company->dispaly_name = $validatedData['display_name'];
             $company->business_type = $validatedData['business_type'];
 
-            $business_number_token = Crypt::encryptString($validatedData['business_registration_number']);
-            $tin_number_token = Crypt::encryptString($validatedData['tin_number']);
-
-            $company->business_registration_number = $business_number_token ;
-            $company->tin_number =  $tin_number_token;
-
             if ($request->hasFile('company_logo')) {
             $company_logo = $request->file('company_logo');
 
@@ -109,7 +105,6 @@ class CompanyController extends Controller
 
                     'business_registration_number' => 'required|string|max:255',
                     'tin_number' => 'required|string|max:255',
-
                 ]);
 
                 if($validate->fails()){
@@ -122,12 +117,6 @@ class CompanyController extends Controller
                 $validatedData = $validate->validated();
 
             $company->fill($validatedData);
-
-                $business_number_token = Crypt::encryptString($validatedData['business_registration_number']);
-                $tin_number_token = Crypt::encryptString($validatedData['tin_number']);
-
-            $company->business_registration_number = $business_number_token;
-            $company->tin_number =  $tin_number_token;
 
             if ($request->hasFile('company_logo')) {
             $company_logo = $request->file('company_logo');
@@ -143,9 +132,9 @@ class CompanyController extends Controller
 
     }
 
-    public function show(Company $company){
-        $company->business_registration_number = Crypt::decryptString($company->business_registration_number);
-        $company->tin_number = Crypt::decryptString($company->tin_number);
+    public function show(Company $company): CompanyResource{
+
+        $company->load('users');
         return new CompanyResource($company);
     }
     public function destroy(Company $company){

@@ -1,5 +1,2 @@
 *
-!json/
-!json/*.json
-!.gitkeep 
 !.gitignore
