@@ -3,46 +3,74 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
-use App\Models\User;
 use App\Http\Requests\StoreUserRequest;
 use Illuminate\Http\Request;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Email;
+use Illuminate\Support\Str;
+use App\Rules\PasswordComplexityRule;
+
+
+use function Laravel\Prompts\error;
+use function Laravel\Prompts\password;
 
 class AuthController extends Controller
 {
-    public function register(StoreUserRequest $request)
-    {
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => $request->password,
-        ]);
-
+    public function register(StoreUserRequest $request){
+        $user = User::create($request->validated());
+        
+        // $user = User::create([
+        //     'name' => $request->name,
+        //     'email' => $request->email,
+        //     'password' => $request->password,
+        // ]);
         $token = $user->createToken($request->name);
+
+
+        // if($request->hasFile('avatar')){
+        //     $avatar = $request->file('avatar');
+
+        //     $fileName = Str::uuid() . '.' . 
+        //     $avatar->getClientOriginalExtension();
+        //     $path = $avatar->storeAs('avatar', $fileName, 'public');
+
+        //     $user->avatar = $path;
+        // };
+
+        // $user->save();
+
         return $token->plainTextToken;
+
     }
 
-    public function login(Request $request)
-    {
-        $request->validate([
-            'email' => 'required|email|exists:users,email',
-            'password' => 'required'
+
+
+    public function login(Request $request){
+
+        $validate = Validator::make($request->all(),[
+            'email'=>'required|email|exist:users',
+            'password' =>'required'
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email',$request->email)->first();
+        $user->load('companies');
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'INVALID CREDENTIALS'], 401);
+        if(!Hash::check($request->password, $user->password)){
+            return [
+                'message' => "INVALID CREDENTIALS",
+            ];
         }
-
         $token = $user->createToken($user->email);
-        return $token->plainTextToken;
+        // return $token->plainTextToken;
+        return response()->json($user);
     }
 
-    public function logout(Request $request)
-    {
+    public function logout(Request $request){
+
         $request->user()->tokens()->delete();
-        return response()->json(['message' => 'Logged out']);
+        return 'logged out';
     }
+
 }

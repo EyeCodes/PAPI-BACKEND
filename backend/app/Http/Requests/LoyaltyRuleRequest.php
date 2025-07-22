@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\MinPurchaseAmountRule;
+use App\Rules\RuleTypeRule;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Rules\ValidRuleTypeFields;
 
@@ -12,7 +14,7 @@ class LoyaltyRuleRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,14 +25,13 @@ class LoyaltyRuleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'rule_type' => ['required', 'string', 'in:purchase_based,birthday_bonus,referral_bonus'],
-            new ValidRuleTypeFields($this->all()),
+            'rule_type' => ['required', 'string', new RuleTypeRule],
+            new ValidRuleTypeFields(),
             'loyalty_program_id' => 'required|exists:loyaltyPrograms,id',
             'rule_name' => 'required|string|max:255',
-            'rule_type' => 'required|string|in:purchase_based,birthday_bonus,referral_bonus,',
             'points_earned' => 'nullable|numeric|min:0',
             'amount_per_point' => 'nullable|numeric|min:0.01',
-            'min_purchase_amount' => 'nullable|numeric|min:0',
+            'min_purchase_amount' => ['nullable','numeric','min:0', new MinPurchaseAmountRule],
             'product_category_id' => 'nullable|integer',
             'product_item_id' => 'nullable|integer',
             'active_from_date' => 'nullable|date',

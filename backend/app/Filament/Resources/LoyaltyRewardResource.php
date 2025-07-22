@@ -37,7 +37,7 @@ class LoyaltyRewardResource extends Resource
         return $form
             ->schema([
                 TextInput::make('reward_name')->required(),
-                Select::make('program_rules_id')
+                Select::make('loyalty_program_rule_id')
                 ->relationship('loyaltyProgramRule', 'rule_name')
                 ->searchable()
                 ->required()

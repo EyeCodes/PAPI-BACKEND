@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\RewardsResource;
 use App\Models\LoyaltyReward as Rewards;
 use Illuminate\Http\Request;
+
 use Illuminate\Http\Response;
 use App\Models\LoyaltyReward;
 use Illuminate\Support\Facades\Validator;
@@ -38,36 +39,9 @@ class LoyaltyRewardsController extends Controller
     {
         $reward = Rewards::create($request->validated());
 
-        $reward = Rewards::create([ 
-            'loyalty_program_id' => $request->loyalty_program_id,
-            $validator = Validator::make($request->all(), [
-            //'loyalty_program_id' => 'required',
-            'reward_name' => 'required|string|max:255',
-            'reward_type' => 'required|string',
-            'point_cost' => 'required|numeric|min:0',
-            'discount_value' => 'nullable|numeric',
-            'discount_percentage' => 'nullable|numeric',
-            'item_id' => 'required|integer',
-            'voucher_code' => 'nullable|string|unique:loyaltyRewards,voucher_code',
-            'is_active' => 'boolean',
-            'max_redemption_rate' => 'nullable|integer',
-            'expiration_days' => 'nullable|integer'
-        ])]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+        if ($reward->fails()) {
+            return response()->json($reward->errors(), 422);
         }
-
-        $reward =LoyaltyReward::create([ 
-            'reward_name' => $request->reward_name,
-            'reward_type' => $request->reward_type,
-            'point_cost' => $request->point_cost,
-            'discount_value' => $request->discount_value,
-            'discount_percentage' => $request->discount_percentage,
-            'item_id' => $request->item_id,
-            'voucher_code' => $request->voucher_code,
-            'is_active' => $request->is_active,
-        ]);
 
         return new RewardsResource($reward);
     }
@@ -83,12 +57,6 @@ class LoyaltyRewardsController extends Controller
     {
         $reward = Rewards::create($request->validated());
 
-        $reward->update([
-            'reward_name' => $request->reward_name,
-            'reward_type' => $request->reward_type,
-            'point_cost' => $request->point_cost,
-            'item_id' => $request->item_id,
-        ]);
         return new RewardsResource($reward);
     }
 

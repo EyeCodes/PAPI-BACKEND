@@ -48,7 +48,9 @@ class LoyaltyProgramResource extends Resource
                 TextInput::make('program_type')
                 ->default('point based'),
 
+
                 Select::make('company_id')->relationship('company', 'company_name')->preload()->searchable()->required(),
+
 
                 Toggle::make('is_active')->default(true),
                 DatePicker::make('start_date')->default(now())->required(),

@@ -10,7 +10,7 @@ class Dashboard extends BaseDashboard
     protected function getHeaderWidgets(): array
     {
         return [
-            UserRegistrationsChart::class,
+            // UserRegistrationsChart::class,
         ];
     }
 }
