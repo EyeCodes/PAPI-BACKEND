@@ -29,9 +29,10 @@ class CompanyResource extends Resource
                     ->image()
                     ->imageCropAspectRatio('1:1')
                     ->maxSize(548),
-                Forms\Components\Select::make('business_type')
+                Forms\Components\Select::make('business_type_id')
                     ->required()
-                    ->options(fn() => self::getBusinessTypes()->pluck('name', 'id'))
+                    ->relationship('businessType', 'type')
+                    ->preload()
                     ->searchable(),
                     Forms\Components\Select::make('user_id')
                     ->required()
@@ -78,18 +79,24 @@ class CompanyResource extends Resource
             ])->columns(2),
         ]);
     }
-
     public static function table(Tables\Table $table): Tables\Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('company_name')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('business_type')->sortable(),
-                Tables\Columns\TextColumn::make('user.name')->label('Owner')->sortable(),
+                Tables\Columns\TextColumn::make('company_name')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('businessType.type')
+                    ->label('Business Type')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('users.name')
+                    ->label('Employees')
+                    ->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('business_type')
-                    ->options(fn() => self::$model::distinct()->pluck('business_type', 'business_type')),
+                Tables\Filters\SelectFilter::make('business_type_id')
+                    ->label('Business Type')
+                    ->relationship('businessType', 'type'),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -108,15 +115,5 @@ class CompanyResource extends Resource
             'create' => Pages\CreateCompany::route('/create'),
             'edit' => Pages\EditCompany::route('/{record}/edit'),
         ];
-    }
-
-    protected static function getBusinessTypes(): Collection
-    {
-        try {
-            return collect(json_decode(Storage::disk('local')->get('businessTypes.json'), true));
-        } catch (\Throwable $e) {
-            Log::error('BusinessTypes load failed: ' . $e->getMessage());
-            return collect();
-        }
     }
 }

@@ -45,4 +45,13 @@ class LoyaltyProgram extends Model
     {
         return $this->belongsTo(Company::class);
     }
+
+    public function rules()
+    {
+        return $this->hasMany(LoyaltyProgramRule::class);
+    }
+    public function rewards()
+    {
+        return $this->hasManyThrough(LoyaltyReward::class, LoyaltyProgramRule::class);
+    }
 }

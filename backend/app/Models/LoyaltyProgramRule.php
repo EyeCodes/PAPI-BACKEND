@@ -43,6 +43,11 @@ class LoyaltyProgramRule extends Model
         return $this->belongsTo(LoyaltyProgram::class);
     }
 
+    public function rewards()
+    {
+        return $this->hasMany(LoyaltyReward::class);
+    }
+    
     /**
      * Belongs to a product category (optional).
      */

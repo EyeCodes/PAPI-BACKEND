@@ -12,7 +12,7 @@ class UpdateUserRequest extends FormRequest
     {
         return [
             'name' => 'sometimes|required|string|max:255',
-            'email' => 'sometimes|required|email|unique:users,email,' . $this->user->id,
+            'email' => 'sometimes|required|email|unique:users,email,' . $this->users->id,
             'password' => ['required', 'string', 'min:8', 'confirmed', new PasswordComplexityRule()],
             // 'password' => [
             //     'nullable',
