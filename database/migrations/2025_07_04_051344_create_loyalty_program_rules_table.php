@@ -22,8 +22,9 @@ return new class extends Migration
 
             // Rule details
             $table->string('rule_name', 255);
-            $table->enum('rule_type', ['purchase_based', 'referral', 'bonus'])
-                ->default('purchase_based');
+            // $table->enum('rule_type', ['purchase_based', 'referral', 'bonus'])
+                // ->default('purchase_based');
+            $table->foreignId('rule_type_id')->constrained('rule_types')->onDelete('cascde')->onUpdate('cascade');
 
             $table->unsignedBigInteger('points_earned')->default(0);
             $table->decimal('amount_per_point', 10, 2)->nullable();

@@ -8,6 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Email;
+use Illuminate\Support\Str;
 
 use function Laravel\Prompts\error;
 use function Laravel\Prompts\password;
@@ -52,13 +53,20 @@ class AuthController extends Controller
 
         $user = User::where('email',$request->email)->first();
 
-        if(!Hash::check($request->password, $user->password)){
-            return [
-                'message' => "INVALID CREDENTIALS",
-            ];
+         if (!$user || !Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'status' => 'fail',
+                'message' => 'Invalid credentials'
+            ], 401);
         }
-        $token = $user->createToken($user->email);
-        return $token->plainTextToken;
+
+        $token = $user->createToken($user->email)->plainTextToken;
+
+         return response()->json([
+            'status' => 'success',
+            'user' => $user,
+            'token' => $token,
+        ]);
     }
 
     public function logout(Request $request){
