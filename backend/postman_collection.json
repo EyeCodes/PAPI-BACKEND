@@ -1,0 +1,324 @@
+{
+  "info": {
+    "name": "Loyalty System API",
+    "description": "Complete API collection for the loyalty system with QR codes and points management",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000/api",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Product Management",
+      "item": [
+        {
+          "name": "List Products",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/points/products/1",
+              "host": ["{{base_url}}"],
+              "path": ["points", "products", "1"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/points/products/1"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Products retrieved successfully\",\n  \"data\": {\n    \"merchant_id\": 1,\n    \"products\": [\n      {\n        \"id\": 1,\n        \"name\": \"Coffee\",\n        \"description\": \"Premium coffee\",\n        \"price\": \"50.00\",\n        \"currency\": \"PHP\",\n        \"stock\": 100\n      },\n      {\n        \"id\": 2,\n        \"name\": \"Sandwich\",\n        \"description\": \"Fresh sandwich\",\n        \"price\": \"120.00\",\n        \"currency\": \"PHP\",\n        \"stock\": 50\n      }\n    ],\n    \"count\": 2\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Transaction Management",
+      "item": [
+        {
+          "name": "Calculate Potential Points",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"merchant_id\": 1,\n  \"amount\": 150.00,\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"quantity\": 2,\n      \"price\": 50.00\n    },\n    {\n      \"product_id\": 2,\n      \"quantity\": 1,\n      \"price\": 50.00\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/points/calculate",
+              "host": ["{{base_url}}"],
+              "path": ["points", "calculate"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"merchant_id\": 1,\n  \"amount\": 150.00,\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"quantity\": 2,\n      \"price\": 50.00\n    },\n    {\n      \"product_id\": 2,\n      \"quantity\": 1,\n      \"price\": 50.00\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/points/calculate"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Points calculated successfully\",\n  \"data\": {\n    \"merchant_id\": 1,\n    \"amount\": 150.00,\n    \"items_count\": 2,\n    \"potential_points\": 15\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Transaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"merchant_id\": 1,\n  \"amount\": 150.00,\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"quantity\": 2,\n      \"price\": 50.00\n    },\n    {\n      \"product_id\": 2,\n      \"quantity\": 1,\n      \"price\": 50.00\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/points/create-transaction",
+              "host": ["{{base_url}}"],
+              "path": ["points", "create-transaction"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"merchant_id\": 1,\n  \"amount\": 150.00,\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"quantity\": 2,\n      \"price\": 50.00\n    },\n    {\n      \"product_id\": 2,\n      \"quantity\": 1,\n      \"price\": 50.00\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/points/create-transaction"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Transaction created successfully\",\n  \"data\": {\n    \"transaction_id\": 123,\n    \"merchant_id\": 1,\n    \"amount\": 150.00,\n    \"potential_points\": 15,\n    \"qr_code\": \"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==\",\n    \"items_count\": 2,\n    \"created_at\": \"2024-01-15T10:30:00.000000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "List User Transactions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/points/transactions/1",
+              "host": ["{{base_url}}"],
+              "path": ["points", "transactions", "1"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/points/transactions/1"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Transactions retrieved successfully\",\n  \"data\": {\n    \"user_id\": 1,\n    \"transactions\": [\n      {\n        \"id\": 123,\n        \"merchant_id\": 1,\n        \"amount\": \"150.00\",\n        \"points_awarded\": true,\n        \"created_at\": \"2024-01-15T10:30:00.000000Z\",\n        \"merchant\": {\n          \"id\": 1,\n          \"name\": \"Coffee Shop\"\n        },\n        \"items\": [\n          {\n            \"product\": {\n              \"id\": 1,\n              \"name\": \"Coffee\",\n              \"price\": \"50.00\"\n            }\n          }\n        ]\n      }\n    ],\n    \"count\": 1\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "QR Code Operations",
+      "item": [
+        {
+          "name": "Scan QR Code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": 1,\n  \"qr_data\": \"encrypted_qr_payload_from_scan\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/points/scan-qr",
+              "host": ["{{base_url}}"],
+              "path": ["points", "scan-qr"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"user_id\": 1,\n  \"qr_data\": \"encrypted_qr_payload_from_scan\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/points/scan-qr"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Points awarded successfully\",\n  \"data\": {\n    \"user_id\": 1,\n    \"transaction_id\": 123,\n    \"points_awarded\": 15,\n    \"new_balance\": 65,\n    \"merchant_id\": 1,\n    \"amount\": 150.00\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Points Operations",
+      "item": [
+        {
+          "name": "Redeem Points",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": 1,\n  \"points\": 50\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/points/redeem",
+              "host": ["{{base_url}}"],
+              "path": ["points", "redeem"]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"user_id\": 1,\n  \"points\": 50\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/points/redeem"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Points redeemed successfully\",\n  \"data\": {\n    \"user_id\": 1,\n    \"points_redeemed\": 50,\n    \"new_balance\": 15\n  }\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
