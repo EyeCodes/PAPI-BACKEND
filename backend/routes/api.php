@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\LoyaltyRuleController;
 use App\Http\Controllers\Api\LoyaltyRewardsController;
 use App\Http\Controllers\Api\LoyaltyProgramController;
+use App\Http\Controllers\FinancialAdvisorController;
 
 // Public authentication routes
 Route::post('register', [AuthController::class, 'register']);
@@ -32,16 +33,25 @@ Route::post('login', [AuthController::class, 'login']);
 // });
 
 
-    Route::get('user', function (Request $request) {
-        return response()->json([
-            'user' => $request->user(),
-            'token' => $request->bearerToken(),
-        ]);
-    });
+Route::get('user', function (Request $request) {
+    return response()->json([
+        'user' => $request->user(),
+        'token' => $request->bearerToken(),
+    ]);
+});
 
-    Route::apiResource('companies', CompanyController::class);
-    Route::apiResource('rewards', LoyaltyRewardsController::class);
-    Route::apiResource('loyalty-rules', LoyaltyRuleController::class);
-    Route::apiResource('loyalty-programs', LoyaltyProgramController::class);
+Route::apiResource('companies', CompanyController::class);
+Route::apiResource('rewards', LoyaltyRewardsController::class);
+Route::apiResource('loyalty-rules', LoyaltyRuleController::class);
+Route::apiResource('loyalty-programs', LoyaltyProgramController::class);
 
-    Route::post('logout', [AuthController::class, 'logout']);
+// AI Financial Advisor Routes
+Route::prefix('ai')->group(function () {
+    Route::post('process-message', [FinancialAdvisorController::class, 'processMessage']);
+    Route::get('categories', [FinancialAdvisorController::class, 'getCategories']);
+    Route::get('configuration', [FinancialAdvisorController::class, 'getConfiguration']);
+    Route::post('change-provider', [FinancialAdvisorController::class, 'changeProvider']);
+    Route::post('test-provider', [FinancialAdvisorController::class, 'testProvider']);
+});
+
+Route::post('logout', [AuthController::class, 'logout']);
