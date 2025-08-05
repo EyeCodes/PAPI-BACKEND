@@ -5,7 +5,15 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\CompanyResource\Pages;
 use App\Helpers\GetLocationDataHelper;
 use App\Models\Company;
+use Exception;
 use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Support\Enums\FontWeight;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Illuminate\Support\Collection;
@@ -16,11 +24,13 @@ class CompanyResource extends Resource
 {
     protected static ?string $model = Company::class;
     protected static ?string $navigationIcon = 'heroicon-o-building-office';
-    protected static ?string $navigationGroup = 'Management';
-    protected static ?string $label = 'Company';
+    protected static ?string $navigationGroup = 'Company Management';
+    protected static ?string $navigationLabel = 'Companies';
+    protected static ?int $navigationSort = 1;
+  
 
     public static function form(Forms\Form $form): Forms\Form
-    {
+    {   
         return $form->schema([
             Forms\Components\Section::make('Company Details')->schema([
                 Forms\Components\TextInput::make('company_name')->required()->maxLength(255),
@@ -29,9 +39,10 @@ class CompanyResource extends Resource
                     ->image()
                     ->imageCropAspectRatio('1:1')
                     ->maxSize(548),
-                Forms\Components\Select::make('business_type')
+                Forms\Components\Select::make('business_type_id')
                     ->required()
-                    ->options(fn() => self::getBusinessTypes()->pluck('name', 'id'))
+                    ->relationship('businessType', 'type')
+                    ->preload()
                     ->searchable(),
                     Forms\Components\Select::make('user_id')
                     ->required()
@@ -78,18 +89,24 @@ class CompanyResource extends Resource
             ])->columns(2),
         ]);
     }
-
     public static function table(Tables\Table $table): Tables\Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('company_name')->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('business_type')->sortable(),
-                Tables\Columns\TextColumn::make('user.name')->label('Owner')->sortable(),
+                Tables\Columns\TextColumn::make('company_name')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('businessType.type')
+                    ->label('Business Type')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('users.name')
+                    ->label('Employees')
+                    ->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('business_type')
-                    ->options(fn() => self::$model::distinct()->pluck('business_type', 'business_type')),
+                Tables\Filters\SelectFilter::make('business_type_id')
+                    ->label('Business Type')
+                    ->relationship('businessType', 'type'),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
@@ -108,15 +125,5 @@ class CompanyResource extends Resource
             'create' => Pages\CreateCompany::route('/create'),
             'edit' => Pages\EditCompany::route('/{record}/edit'),
         ];
-    }
-
-    protected static function getBusinessTypes(): Collection
-    {
-        try {
-            return collect(json_decode(Storage::disk('local')->get('businessTypes.json'), true));
-        } catch (\Throwable $e) {
-            Log::error('BusinessTypes load failed: ' . $e->getMessage());
-            return collect();
-        }
     }
 }

@@ -41,9 +41,9 @@ class LoyaltyReward extends Model
     /**
      * Reward belongs to a loyalty program.
      */
-    public function loyaltyProgramRule(): BelongsTo
+    public function LoyaltyProgramRule(): BelongsTo
     {
-        return $this->belongsTo(loyaltyProgramRule::class);
+        return $this->belongsTo(LoyaltyProgramRule::class);
     }
 
     /**

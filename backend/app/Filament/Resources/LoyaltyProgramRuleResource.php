@@ -89,11 +89,22 @@ class LoyaltyProgramRuleResource extends Resource
         return $table->columns([
             Tables\Columns\TextColumn::make('loyaltyProgram.program_name')->label('Program')->searchable()->sortable(),
             Tables\Columns\TextColumn::make('rule_name')->searchable()->sortable(),
-            Tables\Columns\TextColumn::make('rule_type')->badge()->colors([
-                'primary' => 'purchase_based',
-                'success' => 'birthday',
-                'warning' => 'referral_bonus',
-            ])->formatStateUsing(fn($state) => ucfirst(str_replace('_', ' ', $state))),
+            Tables\Columns\TextColumn::make('rule_type')
+                ->label('Rule Type')
+                ->badge()
+                ->color(fn (string $state): string => match ($state) {
+                    'purchase_based' => 'primary',
+                    'birthday' => 'success',
+                    'referral_bonus' => 'warning',
+                    default => 'gray',
+                })
+                ->formatStateUsing(fn (string $state): string => match ($state) {
+                    'purchase_based' => 'Purchase Based',
+                    'birthday' => 'Birthday Bonus',
+                    'referral_bonus' => 'Referral Bonus',
+                    default => ucfirst(str_replace('_', ' ', $state)),
+                })
+                ->sortable(),
             Tables\Columns\TextColumn::make('points_earned')->suffix(' pts')->numeric()->sortable(),
             Tables\Columns\TextColumn::make('amount_per_point')->prefix('PHP')->numeric(2)->placeholder('N/A'),
             Tables\Columns\TextColumn::make('min_purchase_amount')->prefix('PHP')->numeric(2)->placeholder('N/A'),

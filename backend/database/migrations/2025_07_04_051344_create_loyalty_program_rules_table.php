@@ -22,7 +22,7 @@ return new class extends Migration
 
             // Rule details
             $table->string('rule_name', 255);
-            $table->enum('rule_type', ['purchase_based', 'referral', 'bonus'])
+            $table->enum('rule_type', ['purchase_based', 'referral_bonus', 'birthday'])
                 ->default('purchase_based');
 
             $table->unsignedBigInteger('points_earned')->default(0);

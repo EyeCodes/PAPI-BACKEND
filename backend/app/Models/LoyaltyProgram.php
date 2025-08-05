@@ -45,4 +45,22 @@ class LoyaltyProgram extends Model
     {
         return $this->belongsTo(Company::class);
     }
+
+    public function rules()
+    {
+        return $this->hasMany(LoyaltyProgramRule::class);
+    }
+
+    public function rewards()
+    {
+        return $this->hasManyThrough(LoyaltyReward::class, LoyaltyProgramRule::class);
+    }
+
+    public function isValid(): bool
+    {
+        // Check if the program is active and within the date range
+        return $this->is_active && 
+               (!$this->start_date || $this->start_date <= now()) && 
+               (!$this->end_date || $this->end_date >= now());
+    }
 }

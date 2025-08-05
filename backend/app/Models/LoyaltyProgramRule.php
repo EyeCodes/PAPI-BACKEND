@@ -21,6 +21,7 @@ class LoyaltyProgramRule extends Model
         'min_purchase_amount',
         'product_category_id',
         'product_item_id',
+        'usage_limit',
         'is_active',
         'active_from_date',
         'active_to_date',
@@ -33,6 +34,8 @@ class LoyaltyProgramRule extends Model
         'active_to_date' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'min_purchase_amount' => 'decimal:2',
+        'usage_limit' => 'integer',
     ];
 
     /**
@@ -43,6 +46,11 @@ class LoyaltyProgramRule extends Model
         return $this->belongsTo(LoyaltyProgram::class);
     }
 
+    public function rewards()
+    {
+        return $this->hasMany(LoyaltyReward::class);
+    }
+    
     /**
      * Belongs to a product category (optional).
      */
@@ -58,4 +66,5 @@ class LoyaltyProgramRule extends Model
     {
         return $this->belongsTo(ProductItem::class);
     }
+    
 }

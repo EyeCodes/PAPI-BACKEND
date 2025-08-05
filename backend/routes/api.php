@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CompanyController;
 use App\Http\Controllers\Api\LoyaltyRuleController;
 use App\Http\Controllers\Api\LoyaltyRewardsController;
 use App\Http\Controllers\Api\LoyaltyProgramController;
+use App\Http\Controllers\LoyaltyWebhookController;
 
 // Public authentication routes
 Route::post('register', [AuthController::class, 'register']);
@@ -45,3 +46,6 @@ Route::post('login', [AuthController::class, 'login']);
     Route::apiResource('loyalty-programs', LoyaltyProgramController::class);
 
     Route::post('logout', [AuthController::class, 'logout']);
+
+    Route::get('loyalty/confirm-earning/{transactionId}', [LoyaltyWebhookController::class, 'confirmEarning']);
+    Route::get('loyalty/confirm-redemption/{transactionId}', [LoyaltyWebhookController::class, 'confirmRedemption']);
