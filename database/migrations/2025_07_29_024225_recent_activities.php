@@ -19,6 +19,7 @@ return new class extends Migration
             $table->text('description');
             $table->timestamps();
 
+            
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('recent_activities');
     }
 };
