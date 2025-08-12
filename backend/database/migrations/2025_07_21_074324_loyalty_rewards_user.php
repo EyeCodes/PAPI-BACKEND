@@ -20,7 +20,7 @@ return new class extends Migration
                 ->constrained('users')
                 ->onDelete('cascade');
 
-            $table->decimal('points_used', 10, 2);
+            $table->decimal('points_used', 10, 2)->default(0);
             $table->timestamp('redeemed_at')->nullable();
             $table->enum('status', ['pending', 'redeemed', 'expired'])
                 ->default('pending');

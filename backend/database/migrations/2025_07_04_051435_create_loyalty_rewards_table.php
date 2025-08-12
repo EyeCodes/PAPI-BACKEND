@@ -18,7 +18,7 @@ return new class extends Migration
 
             $table->foreignId('loyalty_program_rule_id')
                 ->nullable()
-                ->constrained('loyalty_program_rul')
+                ->constrained('loyalty_program_rules')
                 ->nullOnDelete();
 
             // Reward details

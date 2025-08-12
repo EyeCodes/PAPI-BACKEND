@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('company_name')->index();
             $table->string('display_name')->nullable();
             $table->string('company_logo', 512)->nullable();
-            $table->string('business_type', 100);
+            $table->foreignId('business_type_id')->nullable()->constrained('business_types')->onDelete('cascade');
 
             // Contact Information
             $table->string('telephone_contact_1', 50);

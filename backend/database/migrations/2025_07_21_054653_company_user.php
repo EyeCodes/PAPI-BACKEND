@@ -16,6 +16,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('company_id')->constrained()->onDelete('cascade');
+            $table->timestamps();
+            
+            $table->unique(['company_id', 'user_id']);
         });
 
         
@@ -26,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('company_user');
     }
 };

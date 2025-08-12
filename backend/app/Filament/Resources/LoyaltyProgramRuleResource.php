@@ -4,27 +4,112 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\LoyaltyProgramRuleResource\Pages;
 use App\Models\LoyaltyProgramRule;
+use App\Traits\HasRoleHelpers;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Resources\Resource;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class LoyaltyProgramRuleResource extends Resource
 {
+    use HasRoleHelpers;
+    
     protected static ?string $model = LoyaltyProgramRule::class;
     protected static ?string $navigationIcon = 'heroicon-o-lock-closed';
     protected static ?string $navigationGroup = 'Loyalty Management';
     protected static ?string $recordTitleAttribute = 'rule_name';
     protected static ?int $navigationSort = 2;
 
+    public static function getEloquentQuery(): Builder
+    {
+        $user = Auth::user();
+        $query = parent::getEloquentQuery();
+        
+        // If user is superadmin, show all rules
+        if ($user->hasRole('superadmin')) {
+            return $query;
+        }
+        
+        // If user is handler, only show rules from their companies' loyalty programs
+        if ($user->hasRole('handler')) {
+            $companyIds = $user->getCompanyIds();
+            return $query->whereHas('loyaltyProgram', function (Builder $subQuery) use ($companyIds) {
+                $subQuery->whereIn('company_id', $companyIds);
+            });
+        }
+        
+        // Default: show no rules if role is not recognized
+        return $query->whereRaw('1 = 0');
+    }
+
+    public static function canCreate(): bool
+    {
+        $user = Auth::user();
+        return $user && ($user->hasRole('superadmin') || $user->hasRole('handler'));
+    }
+
+    public static function canEdit($record): bool
+    {
+        $user = Auth::user();
+        
+        if (!$user) return false;
+        
+        // Superadmin can edit any rule
+        if ($user->hasRole('superadmin')) {
+            return true;
+        }
+        
+        // Handler can edit rules from their companies' programs
+        if ($user->hasRole('handler')) {
+            return $user->canAccessCompany($record->loyaltyProgram->company_id);
+        }
+        
+        return false;
+    }
+
+    public static function canDelete($record): bool
+    {
+        $user = Auth::user();
+        
+        if (!$user) return false;
+        
+        // Superadmin can delete any rule
+        if ($user->hasRole('superadmin')) {
+            return true;
+        }
+        
+        // Handler can delete rules from their companies' programs
+        if ($user->hasRole('handler')) {
+            return $user->canAccessCompany($record->loyaltyProgram->company_id);
+        }
+        
+        return false;
+    }
+
     public static function form(Forms\Form $form): Forms\Form
     {
+        $user = Auth::user();
+        $isSuperadmin = $user->hasRole('superadmin');
+        
         return $form->schema([
             Forms\Components\Section::make('Basic Info')->schema([
                 Forms\Components\Select::make('loyalty_program_id')
                     ->label('Loyalty Program')
-                    ->relationship('loyaltyProgram', 'program_name')
+                    ->relationship('loyaltyProgram', 'program_name', modifyQueryUsing: function (Builder $query) use ($user, $isSuperadmin) {
+                        if ($isSuperadmin) {
+                            return $query->where('is_active', true);
+                        }
+                        
+                        if ($user->hasRole('handler')) {
+                            $companyIds = $user->getCompanyIds();
+                            return $query->whereIn('company_id', $companyIds)->where('is_active', true);
+                        }
+                        
+                        return $query->whereRaw('1 = 0');
+                    })
                     ->required()
                     ->searchable()
                     ->preload(),
@@ -64,11 +149,35 @@ class LoyaltyProgramRuleResource extends Resource
 
             Forms\Components\Section::make('Product Config')->schema([
                 Forms\Components\Select::make('product_category_id')
-                    ->relationship('productCategory', 'category_name')
+                    ->relationship('productCategory', 'category_name', modifyQueryUsing: function (Builder $query) use ($user, $isSuperadmin) {
+                        if ($isSuperadmin) {
+                            return $query;
+                        }
+                        
+                        if ($user->hasRole('handler')) {
+                            $companyIds = $user->getCompanyIds();
+                            // Assuming product categories have company_id field
+                            return $query->whereIn('company_id', $companyIds);
+                        }
+                        
+                        return $query->whereRaw('1 = 0');
+                    })
                     ->searchable()->nullable(),
 
                 Forms\Components\Select::make('product_item_id')
-                    ->relationship('productItem', 'item_name')
+                    ->relationship('productItem', 'item_name', modifyQueryUsing: function (Builder $query) use ($user, $isSuperadmin) {
+                        if ($isSuperadmin) {
+                            return $query;
+                        }
+                        
+                        if ($user->hasRole('handler')) {
+                            $companyIds = $user->getCompanyIds();
+                            // Assuming product items have company_id field
+                            return $query->whereIn('company_id', $companyIds);
+                        }
+                        
+                        return $query->whereRaw('1 = 0');
+                    })
                     ->searchable()->nullable(),
             ])->columns(2)
                 ->visible(fn(Forms\Get $get) => $get('rule_type') === 'purchase_based'),
@@ -86,44 +195,130 @@ class LoyaltyProgramRuleResource extends Resource
 
     public static function table(Tables\Table $table): Tables\Table
     {
+        $user = Auth::user();
+        $isSuperadmin = $user->hasRole('superadmin');
+        
         return $table->columns([
-            Tables\Columns\TextColumn::make('loyaltyProgram.program_name')->label('Program')->searchable()->sortable(),
-            Tables\Columns\TextColumn::make('rule_name')->searchable()->sortable(),
-            Tables\Columns\TextColumn::make('rule_type')->badge()->colors([
-                'primary' => 'purchase_based',
-                'success' => 'birthday',
-                'warning' => 'referral_bonus',
-            ])->formatStateUsing(fn($state) => ucfirst(str_replace('_', ' ', $state))),
-            Tables\Columns\TextColumn::make('points_earned')->suffix(' pts')->numeric()->sortable(),
-            Tables\Columns\TextColumn::make('amount_per_point')->prefix('PHP')->numeric(2)->placeholder('N/A'),
-            Tables\Columns\TextColumn::make('min_purchase_amount')->prefix('PHP')->numeric(2)->placeholder('N/A'),
-            Tables\Columns\IconColumn::make('is_active')->boolean(),
-            Tables\Columns\TextColumn::make('active_from_date')->date('M d, Y')->placeholder('N/A'),
-            Tables\Columns\TextColumn::make('active_to_date')->date('M d, Y')->placeholder('N/A'),
+            Tables\Columns\TextColumn::make('loyaltyProgram.program_name')
+                ->label('Program')
+                ->searchable()
+                ->sortable(),
+                
+            Tables\Columns\TextColumn::make('loyaltyProgram.company.company_name')
+                ->label('Company')
+                ->searchable()
+                ->sortable()
+                ->visible($isSuperadmin),
+                
+            Tables\Columns\TextColumn::make('rule_name')
+                ->searchable()
+                ->sortable(),
+                
+            Tables\Columns\TextColumn::make('rule_type')
+                ->label('Rule Type')
+                ->badge()
+                ->color(fn (string $state): string => match ($state) {
+                    'purchase_based' => 'primary',
+                    'birthday' => 'success',
+                    'referral_bonus' => 'warning',
+                    default => 'gray',
+                })
+                ->formatStateUsing(fn (string $state): string => match ($state) {
+                    'purchase_based' => 'Purchase Based',
+                    'birthday' => 'Birthday Bonus',
+                    'referral_bonus' => 'Referral Bonus',
+                    default => ucfirst(str_replace('_', ' ', $state)),
+                })
+                ->sortable(),
+                
+            Tables\Columns\TextColumn::make('points_earned')
+                ->suffix(' pts')
+                ->numeric()
+                ->sortable(),
+                
+            Tables\Columns\TextColumn::make('amount_per_point')
+                ->prefix('PHP')
+                ->numeric(2)
+                ->placeholder('N/A'),
+                
+            Tables\Columns\TextColumn::make('min_purchase_amount')
+                ->prefix('PHP')
+                ->numeric(2)
+                ->placeholder('N/A'),
+                
+            Tables\Columns\IconColumn::make('is_active')
+                ->boolean(),
+                
+            Tables\Columns\TextColumn::make('active_from_date')
+                ->date('M d, Y')
+                ->placeholder('N/A')
+                ->toggleable(isToggledHiddenByDefault: true),
+                
+            Tables\Columns\TextColumn::make('active_to_date')
+                ->date('M d, Y')
+                ->placeholder('N/A')
+                ->toggleable(isToggledHiddenByDefault: true),
         ])
             ->filters([
-                Tables\Filters\SelectFilter::make('loyalty_program_id')->relationship('loyaltyProgram', 'program_name')->searchable(),
-                Tables\Filters\SelectFilter::make('rule_type')->options([
-                    'purchase_based' => 'Purchase Based',
-                    'birthday' => 'Birthday',
-                    'referral_bonus' => 'Referral Bonus',
-                ]),
-                Tables\Filters\TernaryFilter::make('is_active')->label('Active'),
+                Tables\Filters\SelectFilter::make('company')
+                    ->label('Company')
+                    ->relationship('loyaltyProgram.company', 'company_name')
+                    ->preload()
+                    ->visible($isSuperadmin),
+                    
+                Tables\Filters\SelectFilter::make('loyalty_program_id')
+                    ->relationship('loyaltyProgram', 'program_name', modifyQueryUsing: function (Builder $query) use ($user, $isSuperadmin) {
+                        if ($isSuperadmin) {
+                            return $query;
+                        }
+                        
+                        if ($user->hasRole('handler')) {
+                            $companyIds = $user->getCompanyIds();
+                            return $query->whereIn('company_id', $companyIds);
+                        }
+                        
+                        return $query->whereRaw('1 = 0');
+                    })
+                    ->searchable(),
+                    
+                Tables\Filters\SelectFilter::make('rule_type')
+                    ->options([
+                        'purchase_based' => 'Purchase Based',
+                        'birthday' => 'Birthday',
+                        'referral_bonus' => 'Referral Bonus',
+                    ]),
+                    
+                Tables\Filters\TernaryFilter::make('is_active')
+                    ->label('Active'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\Action::make('duplicate')->icon('heroicon-o-document-duplicate')->color('secondary')
-                    ->action(fn(LoyaltyProgramRule $record) => static::duplicateRule($record)),
-                Tables\Actions\Action::make('toggle')->icon(fn(LoyaltyProgramRule $r) => $r->is_active ? 'heroicon-o-pause' : 'heroicon-o-play')
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->visible(fn ($record) => static::canEdit($record)),
+                Tables\Actions\Action::make('duplicate')
+                    ->icon('heroicon-o-document-duplicate')
+                    ->color('secondary')
+                    ->action(fn(LoyaltyProgramRule $record) => static::duplicateRule($record))
+                    ->visible(fn ($record) => static::canEdit($record)),
+                Tables\Actions\Action::make('toggle')
+                    ->icon(fn(LoyaltyProgramRule $r) => $r->is_active ? 'heroicon-o-pause' : 'heroicon-o-play')
                     ->color(fn(LoyaltyProgramRule $r) => $r->is_active ? 'warning' : 'success')
                     ->label(fn(LoyaltyProgramRule $r) => $r->is_active ? 'Deactivate' : 'Activate')
-                    ->action(fn(LoyaltyProgramRule $r) => static::toggleStatus($r)),
+                    ->action(fn(LoyaltyProgramRule $r) => static::toggleStatus($r))
+                    ->visible(fn ($record) => static::canEdit($record)),
+                Tables\Actions\DeleteAction::make()
+                    ->visible(fn ($record) => static::canDelete($record)),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
-                Tables\Actions\BulkAction::make('Activate')->icon('heroicon-o-play')->color('success')
+                Tables\Actions\DeleteBulkAction::make()
+                    ->visible($isSuperadmin || $user->hasRole('handler')),
+                Tables\Actions\BulkAction::make('Activate')
+                    ->icon('heroicon-o-play')
+                    ->color('success')
                     ->action(fn(Collection $records) => $records->each->update(['is_active' => true])),
-                Tables\Actions\BulkAction::make('Deactivate')->icon('heroicon-o-pause')->color('warning')
+                Tables\Actions\BulkAction::make('Deactivate')
+                    ->icon('heroicon-o-pause')
+                    ->color('warning')
                     ->action(fn(Collection $records) => $records->each->update(['is_active' => false])),
             ])
             ->striped()
@@ -165,5 +360,44 @@ class LoyaltyProgramRuleResource extends Resource
             ->title('Rule status updated')
             ->success()
             ->send();
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        $user = Auth::user();
+        
+        if (!$user) return null;
+        
+        if ($user->isSuperAdmin()) {
+            $total = static::getModel()::count();
+            $active = static::getModel()::where('is_active', true)->count();
+            return "{$active}/{$total}";
+        }
+        
+        if ($user->isHandler()) {
+            $companyIds = $user->getCompanyIds();
+            return (string) static::getModel()::whereHas('loyaltyProgram', function (Builder $query) use ($companyIds) {
+                $query->whereIn('company_id', $companyIds);
+            })->count();
+        }
+        
+        return null;
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        $user = Auth::user();
+        
+        if ($user && $user->isHandler()) {
+            return 'My Program Rules';
+        }
+        
+        return 'Program Rules';
+    }
+
+    public static function canAccess(): bool
+    {
+        $user = Auth::user();
+        return $user && ($user->isSuperAdmin() || $user->isHandler());
     }
 }
